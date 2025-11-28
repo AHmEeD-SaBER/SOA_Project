@@ -6,7 +6,6 @@ from mysql.connector import Error
 app = Flask(__name__)
 CORS(app)
 
-# Database configuration
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'ecommerce_user',
@@ -23,7 +22,35 @@ def get_db_connection():
         return None
 
 
-# Check inventory endpoint (placeholder with basic DB query)
+# Get all products endpoint
+@app.route('/api/inventory/products', methods=['GET'])
+def get_all_products():
+    conn = get_db_connection()
+    if conn:
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM inventory WHERE quantity_available > 0")
+            products = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            
+            return jsonify({
+                "status": "success",
+                "products": products,
+                "count": len(products)
+            }), 200
+        except Error as e:
+            return jsonify({
+                "status": "error",
+                "message": str(e)
+            }), 500
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Database connection failed"
+        }), 500
+
+# Check inventory endpoint
 @app.route('/api/inventory/check/<int:product_id>', methods=['GET'])
 def check_inventory(product_id):
     conn = get_db_connection()
@@ -36,9 +63,12 @@ def check_inventory(product_id):
             conn.close()
             
             if product:
+                in_stock = product['quantity_available'] > 0
                 return jsonify({
                     "status": "success",
-                    "product": product
+                    "product": product,
+                    "in_stock": in_stock,
+                    "available_quantity": product['quantity_available']
                 }), 200
             else:
                 return jsonify({
@@ -56,14 +86,97 @@ def check_inventory(product_id):
             "message": "Database connection failed"
         }), 500
 
-# Update inventory endpoint (placeholder)
+# Update inventory endpoint
 @app.route('/api/inventory/update', methods=['PUT'])
 def update_inventory():
-    return jsonify({
-        "message": "Inventory update endpoint ready",
-        "endpoint": "/api/inventory/update",
-        "status": "placeholder"
-    }), 200
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                "status": "error",
+                "message": "No data provided"
+            }), 400
+            
+        products = data.get('products')
+        
+        if not products or not isinstance(products, list):
+            return jsonify({
+                "status": "error",
+                "message": "products list is required"
+            }), 400
+            
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({
+                "status": "error",
+                "message": "Database connection failed"
+            }), 500
+            
+        cursor = conn.cursor(dictionary=True)
+        updated_products = []
+        
+        try:
+            for product in products:
+                product_id = product.get('product_id')
+                quantity = product.get('quantity')
+                
+                if not product_id or quantity is None:
+                    continue
+                    
+                # Check current stock
+                cursor.execute("SELECT quantity_available FROM inventory WHERE product_id = %s", (product_id,))
+                result = cursor.fetchone()
+                
+                if result:
+                    current_quantity = result['quantity_available']
+                    new_quantity = current_quantity - quantity
+                    
+                    if new_quantity < 0:
+                        conn.rollback()
+                        cursor.close()
+                        conn.close()
+                        return jsonify({
+                            "status": "error",
+                            "message": f"Insufficient stock for product {product_id}. Available: {current_quantity}, Requested: {quantity}"
+                        }), 400
+                    
+                    # Update inventory
+                    cursor.execute(
+                        "UPDATE inventory SET quantity_available = %s, last_updated = CURRENT_TIMESTAMP WHERE product_id = %s",
+                        (new_quantity, product_id)
+                    )
+                    updated_products.append({
+                        "product_id": product_id,
+                        "previous_quantity": current_quantity,
+                        "new_quantity": new_quantity,
+                        "deducted": quantity
+                    })
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            return jsonify({
+                "status": "success",
+                "message": "Inventory updated successfully",
+                "updated_products": updated_products
+            }), 200
+            
+        except Error as e:
+            conn.rollback()
+            cursor.close()
+            conn.close()
+            return jsonify({
+                "status": "error",
+                "message": str(e)
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"An error occurred: {str(e)}"
+        }), 500
 
 
 if __name__ == '__main__':
