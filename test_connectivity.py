@@ -1,11 +1,5 @@
-"""
-Connectivity Test Script
-Tests all 5 Flask services to verify they are running
-Does NOT make actual requests - just checks if services respond
-"""
 import requests
 
-# Service configurations - using root paths for simple availability check
 SERVICES = {
     'Order Service': 'http://localhost:5001/',
     'Inventory Service': 'http://localhost:5002/',
@@ -15,7 +9,6 @@ SERVICES = {
 }
 
 def test_service(name, url):
-    """Test if a service is running and responding"""
     try:
         response = requests.get(url, timeout=2)
         
