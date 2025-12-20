@@ -8,106 +8,449 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - E-Commerce Store</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #1e1e1e;
+            --bg-hover: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --accent: #00d4ff;
+            --accent-glow: rgba(0, 212, 255, 0.3);
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff4757;
+            --border: #2a2a2a;
+            --border-hover: #404040;
+            --gradient-accent: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
             min-height: 100vh;
             padding: 20px;
+            color: var(--text-primary);
+            overflow-x: hidden;
         }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 255, 136, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            padding: 40px;
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            box-shadow: 
+                0 0 0 1px var(--border),
+                0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                0 0 100px rgba(0, 212, 255, 0.05);
+            padding: 50px;
+            animation: containerFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(20px);
         }
+        
+        @keyframes containerFadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
         header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
         }
-        h1 { color: #333; font-size: 2.2em; margin-bottom: 10px; }
-        .subtitle { color: #666; font-size: 1.1em; }
-        .profile-icon { font-size: 80px; text-align: center; margin-bottom: 20px; }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 2px;
+            background: var(--gradient-accent);
+            border-radius: 2px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        h1 { 
+            color: var(--text-primary); 
+            font-size: 2.5em; 
+            margin-bottom: 12px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            color: var(--text-secondary); 
+            font-size: 1.1em;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+        
+        .profile-icon { 
+            text-align: center; 
+            margin: 30px 0;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 30px var(--accent-glow));
+        }
+        .profile-name{
+            font-size: 3.5em;
+            color: aqua;
+            font-weight: 800;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
         .profile-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 25px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+            animation-delay: 0.2s;
         }
+        
+        .profile-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         .profile-card h2 {
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e0e0e0;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            font-size: 1.4em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
+        
         .info-row {
             display: flex;
-            padding: 15px 0;
-            border-bottom: 1px solid #e0e0e0;
+            align-items: center;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
-        .info-row:last-child { border-bottom: none; }
-        .info-label {
-            font-weight: bold;
-            color: #333;
-            min-width: 150px;
-            font-size: 1.1em;
-        }
-        .info-value { color: #666; font-size: 1.1em; flex: 1; }
-        .loyalty-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        
+        .info-row:hover {
+            background: var(--bg-tertiary);
+            margin: 0 -20px;
+            padding: 18px 20px;
             border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 25px;
         }
-        .loyalty-section h2 { margin-bottom: 15px; font-size: 1.5em; }
-        .loyalty-points { font-size: 3em; font-weight: bold; margin: 15px 0; }
-        .loyalty-label { font-size: 1.1em; opacity: 0.9; }
-        .loyalty-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 20px;
+        
+        .info-row:last-child { border-bottom: none; }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 160px;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value { 
+            color: var(--text-primary); 
+            font-size: 1.1em; 
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .loyalty-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 20px;
-            margin-top: 15px;
-            font-weight: bold;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+            animation-delay: 0.1s;
         }
-        .button-group { display: flex; gap: 15px; margin-top: 30px; }
+        
+        .loyalty-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-accent);
+        }
+        
+        .loyalty-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at 50% 0%, var(--accent-glow) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        
+        .loyalty-section h2 { 
+            margin-bottom: 20px; 
+            font-size: 1.3em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .loyalty-points { 
+            font-size: 5em; 
+            font-weight: 800; 
+            margin: 20px 0;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px var(--accent-glow);
+            position: relative;
+            z-index: 1;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px var(--accent-glow)); }
+            to { filter: drop-shadow(0 0 40px var(--accent-glow)); }
+        }
+        
+        .loyalty-label { 
+            font-size: 1.1em; 
+            color: var(--text-secondary);
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .loyalty-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 14px 28px;
+            border-radius: 50px;
+            margin-top: 25px;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: var(--accent);
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+        
+        .loyalty-badge:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+            transform: scale(1.05);
+        }
+        
+        .loyalty-badge::before {
+            content: '👑';
+            font-size: 1.2em;
+        }
+        
+        .button-group { 
+            display: flex; 
+            gap: 20px; 
+            margin-top: 35px;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+            animation-delay: 0.3s;
+        }
+        
         .btn {
             flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1.1em;
-            font-weight: bold;
+            padding: 18px 24px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            font-size: 1em;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             text-align: center;
             text-decoration: none;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
         }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-accent);
+            transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: -1;
+        }
+        
+        .btn:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+            color: var(--bg-primary);
+        }
+        
+        .btn:hover::before {
+            left: 0;
+        }
+        
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--bg-tertiary);
         }
-        .btn-primary:hover {
-            transform: scale(1.02);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        
+        .btn-secondary { 
+            background: var(--gradient-accent);
+            color: var(--bg-primary);
+            border-color: transparent;
         }
-        .btn-secondary { background: #28a745; color: white; }
-        .btn-secondary:hover { background: #218838; }
+        
+        .btn-secondary::before {
+            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
+        }
+        
+        .btn-secondary:hover { 
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+            color: var(--bg-primary);
+        }
+        
         .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 20px;
-            border-radius: 5px;
+            background: rgba(255, 71, 87, 0.1);
+            color: var(--danger);
+            padding: 30px;
+            border-radius: 16px;
             text-align: center;
-            margin: 20px 0;
-            border: 1px solid #f5c6cb;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .error-message h2 {
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+        
+        .error-message p {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+            animation-delay: 0.15s;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
+        }
+        
+        .stat-icon {
+            font-size: 2em;
+            margin-bottom: 12px;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+        
+        ::selection { background: var(--accent); color: var(--bg-primary); }
+        
+        @media (max-width: 768px) {
+            .container { padding: 25px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .button-group { flex-direction: column; }
+            .info-row { flex-direction: column; gap: 8px; }
+            .info-label { min-width: auto; }
         }
     </style>
 </head>
@@ -159,7 +502,11 @@
                 }
         %>
         
-        <div class="profile-icon">👤</div>
+        <div class="profile-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" fill="var(--accent)" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            
+        <h2 class ="profile-name"><%= customerData.optString("name", "User") %></h2>
+        </div>
 
         <!-- Loyalty Points Section -->
         <div class="loyalty-section">
