@@ -117,7 +117,7 @@ def create_order():
 
 
 def get_order(order_id):
-    """Get order by ID endpoint"""
+    """Get order by ID endpoint - FIXED with JOIN"""
     try:
         conn = get_db_connection()
         if not conn:
@@ -142,8 +142,18 @@ def get_order(order_id):
                 "message": f"Order {order_id} not found"
             }), 404
         
+        # FIXED: Use JOIN to get product name from inventory table
         cursor.execute(
-            "SELECT product_id, quantity, unit_price FROM order_items WHERE order_id = %s",
+            """
+            SELECT 
+                oi.product_id, 
+                oi.quantity, 
+                oi.unit_price,
+                i.product_name as name
+            FROM order_items oi
+            LEFT JOIN inventory i ON oi.product_id = i.product_id
+            WHERE oi.order_id = %s
+            """,
             (order_id,)
         )
         items = cursor.fetchall()
@@ -152,7 +162,12 @@ def get_order(order_id):
         conn.close()
         
         products = [
-            {"product_id": item['product_id'], "quantity": item['quantity']}
+            {
+                "product_id": item['product_id'], 
+                "quantity": item['quantity'], 
+                "unit_price": float(item['unit_price']), 
+                "name": item['name'] if item['name'] else f"Product #{item['product_id']}"
+            }
             for item in items
         ]
         

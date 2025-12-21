@@ -480,10 +480,11 @@
                                         double unitPrice = item.optDouble("unit_price", 0);
                                         int quantity = item.optInt("quantity", 0);
                                         double itemTotal = unitPrice * quantity;
+                                        String itemname = item.optString("name", "Product #" + item.optInt("product_id", 0));
                             %>
                             <div class="item-row">
                                 <div>
-                                    <div class="item-name"><%= item.optString("product_name", "Product #" + item.optInt("product_id", 0)) %></div>
+                                    <div class="item-name"><%= item.optString("name", "Product #" + item.optInt("product_id", 0)) %></div>
                                     <div class="item-details">Quantity: <%= quantity %> × $<%= String.format("%.2f", unitPrice) %></div>
                                 </div>
                                 <div class="item-price">$<%= String.format("%.2f", itemTotal) %></div>
