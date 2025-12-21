@@ -13,6 +13,7 @@ public class OrdersHistoryServlet extends HttpServlet {
 
     private static final String CUSTOMER_SERVICE_URL = "http://localhost:5004";
     private static final String ORDER_SERVICE_URL = "http://localhost:5001";
+    private static final String INVENTORY_SERVICE_URL = "http://localhost:5002";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -91,6 +92,52 @@ public class OrdersHistoryServlet extends HttpServlet {
 
                         if (detailResult.getString("status").equals("success")) {
                             JSONObject detailedOrder = detailResult.getJSONObject("order");
+
+                            // Enrich products with names from inventory service
+                            JSONArray products = detailedOrder.getJSONArray("products");
+                            JSONArray enrichedProducts = new JSONArray();
+
+                            for (int j = 0; j < products.length(); j++) {
+                                JSONObject product = products.getJSONObject(j);
+                                int productId = product.getInt("product_id");
+
+                                // Use product name provided by Order Service if available
+                                String existingName = product.optString("name", null);
+                                if (existingName == null || existingName.isEmpty()) {
+                                    // Call inventory service to get product name as a fallback
+                                    try {
+                                        HttpRequest inventoryRequest = HttpRequest.newBuilder()
+                                                .uri(URI.create(
+                                                        INVENTORY_SERVICE_URL + "/api/inventory/check/" + productId))
+                                                .GET()
+                                                .build();
+
+                                        HttpResponse<String> inventoryResponse = client.send(inventoryRequest,
+                                                BodyHandlers.ofString());
+
+                                        if (inventoryResponse.statusCode() == 200) {
+                                            JSONObject inventoryResult = new JSONObject(inventoryResponse.body());
+
+                                            if (inventoryResult.getString("status").equals("success")) {
+                                                JSONObject productDetails = inventoryResult.getJSONObject("product");
+                                                product.put("name",
+                                                        productDetails.optString("product_name",
+                                                                "Product #" + productId));
+                                            } else {
+                                                product.put("name", "Product #" + productId);
+                                            }
+                                        } else {
+                                            product.put("name", "Product #" + productId);
+                                        }
+                                    } catch (Exception e) {
+                                        product.put("name", "Product #" + productId);
+                                    }
+                                }
+
+                                enrichedProducts.put(product);
+                            }
+
+                            detailedOrder.put("products", enrichedProducts);
                             detailedOrders.put(detailedOrder);
                             System.out.println("Order " + orderId + " details loaded successfully");
                         } else {
