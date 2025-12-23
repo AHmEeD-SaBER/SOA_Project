@@ -279,7 +279,6 @@
 
     <div class="button-group">
         <a href="index.jsp">← Back to Store</a>
-        <a href="profile.jsp">Back to Profile</a>
     </div>
 </div>
 </body>
