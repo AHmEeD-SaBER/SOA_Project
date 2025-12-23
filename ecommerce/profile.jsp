@@ -554,6 +554,10 @@
         <div class="button-group">
             <a href="index.jsp" class="btn btn-primary">← Back to Store</a>
             <button type="button" class="btn btn-secondary" onclick="document.getElementById('ordersForm').submit()">📋 View Orders History</button>
+            <button type="button" class="btn btn-secondary" 
+        onclick="window.location.href='NotificationHistoryServlet?customerId=<%= customerId %>'">
+    🔔 View Notifications
+</button>
         </div>
         
         <% } %>
