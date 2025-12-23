@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from config import SERVICE_PORT, SERVICE_HOST, DEBUG
-from resources import send_notification
+from resources import get_customer_notifications, send_notification
 
 app = Flask(__name__)
 CORS(app)
@@ -11,6 +11,10 @@ CORS(app)
 @app.route('/api/notifications/send', methods=['POST'])
 def notification():
     return send_notification()
+
+@app.route('/api/notifications/customer/<int:customer_id>', methods=['GET'])
+def customer_notifications(customer_id):
+    return get_customer_notifications(customer_id)
 
 
 if __name__ == '__main__':

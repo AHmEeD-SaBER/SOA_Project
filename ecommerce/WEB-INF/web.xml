@@ -49,6 +49,15 @@
         <servlet-name>OrdersHistoryServlet</servlet-name>
         <url-pattern>/OrdersHistoryServlet</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>NotificationHistoryServlet</servlet-name>
+        <servlet-class>servlets.NotificationHistoryServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>NotificationHistoryServlet</servlet-name>
+        <url-pattern>/NotificationHistoryServlet</url-pattern>
+    </servlet-mapping>
     
     <!-- Welcome File List -->
     <welcome-file-list>
