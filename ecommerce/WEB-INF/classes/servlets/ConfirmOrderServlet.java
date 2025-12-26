@@ -110,7 +110,7 @@ public class ConfirmOrderServlet extends HttpServlet {
             // Step 3: Update loyalty points using Customer Service
             System.out.println("=== Step 3: Updating loyalty points ===");
 
-            int loyaltyPoints = (int) Math.floor(grandTotal); // 1 point per dollar
+            int loyaltyPoints = (int) Math.floor(grandTotal);
             JSONObject loyaltyPayload = new JSONObject();
             loyaltyPayload.put("points", loyaltyPoints);
             loyaltyPayload.put("operation", "add");

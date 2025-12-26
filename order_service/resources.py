@@ -142,7 +142,6 @@ def get_order(order_id):
                 "message": f"Order {order_id} not found"
             }), 404
         
-        # FIXED: Use JOIN to get product name from inventory table
         cursor.execute(
             """
             SELECT 

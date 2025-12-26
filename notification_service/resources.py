@@ -109,13 +109,12 @@ def send_notification():
                     inv_data = inv_response.json()
                     if inv_data.get('status') == 'success':
                         prod_info = inv_data.get('product', {})
-                        # Convert price to float
                         price_str = prod_info.get('unit_price', '0')
                         price_float = float(price_str) if price_str else 0.0
                         product_details.append({
                             "name": prod_info.get('product_name', f'Product {product_id}'),
                             "quantity": quantity,
-                            "price": price_float  # now float
+                            "price": price_float 
                         })
             except Exception as e:
                 print(f"Inventory error for {product_id}: {e}")
@@ -133,10 +132,8 @@ def send_notification():
         ]
 
         for item in product_details:
-            # Now item['price'] is float → safe to format
             message_lines.append(f"  - {item['name']} x {item['quantity']} - ${item['price']:.2f}")
 
-        # Total amount (already fixed in your code)
         total_amount = order.get('total_amount', 0)
         total_float = float(total_amount) if total_amount else 0.0
         message_lines.append(f"\nTotal Amount: ${total_float:.2f}")
@@ -176,7 +173,6 @@ def send_notification():
             finally:
                 conn.close()
         
-        # Step 7: ALWAYS RETURN SUCCESS
         return jsonify({
             "status": "success",
             "message": "Notification sent successfully",
