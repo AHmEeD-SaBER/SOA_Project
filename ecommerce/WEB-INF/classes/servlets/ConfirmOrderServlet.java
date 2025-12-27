@@ -126,45 +126,20 @@ public class ConfirmOrderServlet extends HttpServlet {
             System.out.println("Loyalty update response: " + loyaltyResponse.statusCode());
             System.out.println("Loyalty response body: " + loyaltyResponse.body());
 
-            JSONObject loyaltyResult = new JSONObject(loyaltyResponse.body());
             int newLoyaltyPoints = 0;
-            if (loyaltyResult.optString("status").equals("success")) {
-                if (loyaltyResult.has("customer")) {
-                    JSONObject customerObj = loyaltyResult.getJSONObject("customer");
-                    newLoyaltyPoints = customerObj.optInt("loyalty_points", 0);
-                    System.out.println("Loyalty points updated. New balance: " + newLoyaltyPoints);
-                } else if (loyaltyResult.has("loyalty_points")) {
-                    newLoyaltyPoints = loyaltyResult.optInt("loyalty_points", 0);
-                    System.out.println("Loyalty points updated. New balance: " + newLoyaltyPoints);
+
+            if (loyaltyResponse.statusCode() == 200) {
+                JSONObject loyaltyResult = new JSONObject(loyaltyResponse.body());
+
+                if ("success".equals(loyaltyResult.optString("status"))) {
+                    // The Customer Service returns "new_points", not "loyalty_points"
+                    newLoyaltyPoints = loyaltyResult.optInt("new_points", 0);
+                    System.out.println("Loyalty points updated successfully. New balance: " + newLoyaltyPoints);
                 } else {
-                    System.err.println(
-                            "Warning: 'customer' object or 'loyalty_points' not found in loyalty service response: "
-                                    + loyaltyResult.toString());
+                    System.err.println("Loyalty update failed: " + loyaltyResult.optString("message"));
                 }
             } else {
-                System.err.println("Loyalty update failed or status not 'success': " + loyaltyResult.toString());
-            }
-
-            // If we didn't get new loyalty points, try to fetch customer data
-            if (newLoyaltyPoints == 0) {
-                try {
-                    HttpRequest customerRequest = HttpRequest.newBuilder()
-                            .uri(URI.create(CUSTOMER_SERVICE_URL + "/api/customers/" + customerId))
-                            .GET()
-                            .build();
-
-                    HttpResponse<String> customerResponse = client.send(customerRequest, BodyHandlers.ofString());
-                    if (customerResponse.statusCode() == 200) {
-                        JSONObject custResult = new JSONObject(customerResponse.body());
-                        if (custResult.optString("status").equals("success") && custResult.has("customer")) {
-                            JSONObject customerObj = custResult.getJSONObject("customer");
-                            newLoyaltyPoints = customerObj.optInt("loyalty_points", 0);
-                            System.out.println("Fetched loyalty points from customer data: " + newLoyaltyPoints);
-                        }
-                    }
-                } catch (Exception e) {
-                    System.err.println("Failed to fetch customer data for loyalty points: " + e.getMessage());
-                }
+                System.err.println("Loyalty update request failed with status: " + loyaltyResponse.statusCode());
             }
 
             // Step 4: Send notification using Notification Service
