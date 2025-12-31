@@ -22,9 +22,7 @@ public class OrdersHistoryServlet extends HttpServlet {
         System.out.println("=== OrdersHistoryServlet: Processing orders history request ===");
 
         try {
-            // Read customer ID from request
             String customerId = request.getParameter("customerId");
-
             System.out.println("Customer ID: " + customerId);
 
             if (customerId == null || customerId.isEmpty()) {
@@ -35,10 +33,8 @@ public class OrdersHistoryServlet extends HttpServlet {
 
             HttpClient client = HttpClient.newHttpClient();
 
-            // Step 1: Get customer orders using Customer Service
-            System.out.println("=== Step 1: Fetching customer orders ===");
-
-            // Call Customer Service: GET /api/customers/{customer_id}/orders
+            System.out.println("=== Fetching customer orders ===");
+            
             HttpRequest ordersRequest = HttpRequest.newBuilder()
                     .uri(URI.create(CUSTOMER_SERVICE_URL + "/api/customers/" + customerId + "/orders"))
                     .GET()
@@ -63,104 +59,15 @@ public class OrdersHistoryServlet extends HttpServlet {
             }
 
             JSONObject customerData = ordersResult.getJSONObject("customer");
-            JSONArray ordersList = ordersResult.getJSONArray("orders");
+            JSONArray orders = ordersResult.getJSONArray("orders"); 
             int orderCount = ordersResult.getInt("order_count");
 
             System.out.println("Found " + orderCount + " orders for customer " + customerData.getString("name"));
 
-            // Step 2: Get detailed information for each order using Order Service
-            System.out.println("=== Step 2: Fetching order details ===");
-
-            JSONArray detailedOrders = new JSONArray();
-
-            for (int i = 0; i < ordersList.length(); i++) {
-                JSONObject order = ordersList.getJSONObject(i);
-                int orderId = order.getInt("order_id");
-
-                try {
-                    // Call Order Service: GET /api/orders/{order_id}
-                    HttpRequest orderDetailRequest = HttpRequest.newBuilder()
-                            .uri(URI.create(ORDER_SERVICE_URL + "/api/orders/" + orderId))
-                            .GET()
-                            .build();
-
-                    HttpResponse<String> orderDetailResponse = client.send(orderDetailRequest, BodyHandlers.ofString());
-                    System.out.println("Order " + orderId + " details response: " + orderDetailResponse.statusCode());
-
-                    if (orderDetailResponse.statusCode() == 200) {
-                        JSONObject detailResult = new JSONObject(orderDetailResponse.body());
-
-                        if (detailResult.getString("status").equals("success")) {
-                            JSONObject detailedOrder = detailResult.getJSONObject("order");
-
-                            // Enrich products with names from inventory service
-                            JSONArray products = detailedOrder.getJSONArray("products");
-                            JSONArray enrichedProducts = new JSONArray();
-
-                            for (int j = 0; j < products.length(); j++) {
-                                JSONObject product = products.getJSONObject(j);
-                                int productId = product.getInt("product_id");
-
-                                // Use product name provided by Order Service if available
-                                String existingName = product.optString("name", null);
-                                if (existingName == null || existingName.isEmpty()) {
-                                    // Call inventory service to get product name as a fallback
-                                    try {
-                                        HttpRequest inventoryRequest = HttpRequest.newBuilder()
-                                                .uri(URI.create(
-                                                        INVENTORY_SERVICE_URL + "/api/inventory/check/" + productId))
-                                                .GET()
-                                                .build();
-
-                                        HttpResponse<String> inventoryResponse = client.send(inventoryRequest,
-                                                BodyHandlers.ofString());
-
-                                        if (inventoryResponse.statusCode() == 200) {
-                                            JSONObject inventoryResult = new JSONObject(inventoryResponse.body());
-
-                                            if (inventoryResult.getString("status").equals("success")) {
-                                                JSONObject productDetails = inventoryResult.getJSONObject("product");
-                                                product.put("name",
-                                                        productDetails.optString("product_name",
-                                                                "Product #" + productId));
-                                            } else {
-                                                product.put("name", "Product #" + productId);
-                                            }
-                                        } else {
-                                            product.put("name", "Product #" + productId);
-                                        }
-                                    } catch (Exception e) {
-                                        product.put("name", "Product #" + productId);
-                                    }
-                                }
-
-                                enrichedProducts.put(product);
-                            }
-
-                            detailedOrder.put("products", enrichedProducts);
-                            detailedOrders.put(detailedOrder);
-                            System.out.println("Order " + orderId + " details loaded successfully");
-                        } else {
-                            // Use basic order info if details not available
-                            detailedOrders.put(order);
-                        }
-                    } else {
-                        // Use basic order info if service fails
-                        detailedOrders.put(order);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error fetching details for order " + orderId + ": " + e.getMessage());
-                    // Use basic order info if error occurs
-                    detailedOrders.put(order);
-                }
-            }
-
-            System.out.println("Total detailed orders: " + detailedOrders.length());
-
             // Set attributes for View_orders_history.jsp
             request.setAttribute("customerId", customerId);
             request.setAttribute("customerData", customerData.toString());
-            request.setAttribute("orders", detailedOrders.toString());
+            request.setAttribute("orders", orders.toString());  
             request.setAttribute("orderCount", orderCount);
 
             System.out.println("=== OrdersHistoryServlet: Forwarding to View_orders_history.jsp ===");

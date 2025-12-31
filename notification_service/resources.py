@@ -105,8 +105,8 @@ def send_notification():
                 "message": f"Failed to connect to Customer Service: {str(e)}"
             }), 500
         
-        # Step 3: Send notification
-        print("Step 3: Sending notification...")
+        # Step 3: Build notification message
+        print("Step 3: Building notification message...")
         
         notification_message = f"""
 Order Confirmation - Order #{order_id}
@@ -131,19 +131,60 @@ Order Details:
         print(notification_message)
         print("=" * 50)
         
-        # Here you would send actual email/SMS
-        # send_email(customer['email'], notification_message)
+        # Step 4: Save notification to database
+        print("Step 4: Saving notification to database...")
         
-        return jsonify({
-            "status": "success",
-            "message": "Notification sent successfully",
-            "notification": {
-                "order_id": order_id,
-                "customer_id": customer_id,
-                "customer_email": customer.get('email', 'N/A'),
-                "sent_at": datetime.now().isoformat()
-            }
-        }), 200
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({
+                "status": "error",
+                "message": "Database connection failed"
+            }), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        try:
+            notification_timestamp = datetime.now()
+            cursor.execute(
+                """
+                INSERT INTO notification_log (order_id, customer_id, notification_type, message, sent_at) 
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                (order_id, customer_id, 'order_confirmation', notification_message, notification_timestamp)
+            )
+            notification_id = cursor.lastrowid
+            
+            conn.commit()
+            
+            notification_timestamp = notification_timestamp.isoformat()
+            
+            cursor.close()
+            conn.close()
+            
+            print(f"Notification saved with ID: {notification_id}")
+            
+            return jsonify({
+                "status": "success",
+                "message": "Notification sent successfully",
+                "notification": {
+                    "notification_id": notification_id,
+                    "order_id": order_id,
+                    "customer_id": customer_id,
+                    "customer_email": customer.get('email', 'N/A'),
+                    "notification_type": "order_confirmation",
+                    "sent_at": notification_timestamp
+                }
+            }), 201
+            
+        except Error as e:
+            conn.rollback()
+            cursor.close()
+            conn.close()
+            print(f"Database error: {str(e)}")
+            return jsonify({
+                "status": "error",
+                "message": f"Database error: {str(e)}"
+            }), 500
         
     except Exception as e:
         print(f"Notification Service Error: {str(e)}")

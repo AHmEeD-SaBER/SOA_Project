@@ -222,13 +222,27 @@ def get_orders_by_customer():
         
         for order in orders:
             cursor.execute(
-                "SELECT product_id, quantity FROM order_items WHERE order_id = %s",
+                """
+                SELECT 
+                    oi.product_id, 
+                    oi.quantity, 
+                    oi.unit_price,
+                    i.product_name as name
+                FROM order_items oi
+                LEFT JOIN inventory i ON oi.product_id = i.product_id
+                WHERE oi.order_id = %s
+                """,
                 (order['order_id'],)
             )
             items = cursor.fetchall()
             
             products = [
-                {"product_id": item['product_id'], "quantity": item['quantity']}
+                {
+                    "product_id": item['product_id'], 
+                    "quantity": item['quantity'],
+                    "unit_price": float(item['unit_price']),
+                    "name": item['name'] if item['name'] else f"Product #{item['product_id']}"
+                }
                 for item in items
             ]
             

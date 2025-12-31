@@ -67,7 +67,6 @@ public class NotificationHistoryServlet extends HttpServlet {
             request.setAttribute("notifications", result.getJSONArray("notifications").toString());
             request.setAttribute("notificationCount", result.optInt("count", 0));
 
-            // Also fetch customer name for display (optional but nice)
             request.setAttribute("customerName", getCustomerName(client, customerId));
 
             request.getRequestDispatcher("notifications.jsp").forward(request, response);
@@ -79,7 +78,6 @@ public class NotificationHistoryServlet extends HttpServlet {
         }
     }
 
-    // Optional helper to show customer name in header
     private String getCustomerName(HttpClient client, int customerId) {
         try {
             HttpRequest req = HttpRequest.newBuilder()
