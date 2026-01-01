@@ -53,9 +53,9 @@ Write-Host "=====================================" -ForegroundColor Cyan
 #     Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
 # }
 
-Write-Host ""
-Write-Host "All services stopped!" -ForegroundColor Green
-Write-Host "Virtual environments deactivated." -ForegroundColor Green
-Write-Host ""
+# Write-Host ""
+# Write-Host "All services stopped!" -ForegroundColor Green
+# Write-Host "Virtual environments deactivated." -ForegroundColor Green
+# Write-Host ""
 Write-Host "Press any key to exit..." -ForegroundColor Cyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
