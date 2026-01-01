@@ -116,8 +116,8 @@ def create_order():
         }), 500
 
 
-def get_order(order_id):
-    """Get order by ID endpoint - FIXED with JOIN"""
+def get_order(order_id):    
+    """Get order by ID endpoint"""
     try:
         conn = get_db_connection()
         if not conn:
